@@ -6,20 +6,24 @@ SELECT order_id FROM (shipment
    INNER JOIN warehouse ON shipment.warehouse_id=warehouse.warehouse_id AND warehouse.warehouse_city="Arica")
 
 
-SELECT (order_item.quantity*item.unit_price) FROM (
-    (order_item INNER JOIN shipment ON shipment.warehouse_id='8' 
-    AND order_item.order_id =shipment.order_id
-    ) 
-INNER JOIN item ON order_item.item_id=item.item_id)
+SELECT order_item.order_id,shipment.warehouse_id,SUM(order_item.quantity*item.unit_price) AS TotalPrice FROM order_item
+JOIN item ON order_item.item_id = item.item_id
+JOIN shipment ON order_item.order_id = shipment.order_id WHERE shipment.warehouse_id=8
+GROUP BY order_item.order_id;
 
 
 SELECT warehouse.warehouse_id,warehouse.warehouse_city,COUNT(shipment.order_id) FROM warehouse 
 LEFT JOIN shipment ON warehouse.warehouse_id=shipment.warehouse_id GROUP BY warehouse_id
 
-SELECT customer.customer_name, COUNT(order.order_id) FROM customer  LEFT JOIN 'order' GROUP BY customer.customer_id
+SELECT customer.customer_name,COUNT(lab4.order_id) AS TotalOrders FROM customer
+LEFT JOIN lab4 ON lab4.customer_id = customer.customer_id
+GROUP BY customer.customer_name
+ORDER BY customer.customer_name;
 
 
-SELECT item.item_id, COUNT(order_item.item_id)
-FROM item LEFT  JOIN order_item ON order_item.item_id = item.item_id
-WHERE order_item.item_id IS NULL
-GROUP BY item.item_id;
+
+SELECT item.item_id,item.unit_price FROM item
+LEFT JOIN order_item ON order_item.item_id = item.item_id
+GROUP BY item.item_id
+HAVING COUNT(order_item.item_id)=0
+ORDER BY item.item_id;
